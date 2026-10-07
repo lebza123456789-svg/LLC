@@ -1,98 +1,87 @@
+from dataclasses import dataclass, field
+from datetime import datetime
+
+@dataclass
 class User:
-    def __init__(self, username, password, email, profile_picture=None):
-        self.username = username
-        self.password = password
-        self.email = email
-        self.profile_picture = profile_picture
-    
-    def create_acc(self):
-        return f"{self.username} Account created succesfully"
+    username: str
+    email: str
+    password_hash: str
+    profile_picture: str | None = None
+    cars: list["Car"] = field(default_factory=list)
+    location: str | None = None
+    created_at: datetime = field(default_factory=datetime.now)
 
-
-    def login(self):
-        return f"{self.username} Successfully logged in!"
-    
-    def logout(self):
-        return f"{self.username} Successfully logged out"
-    
-    def add_car(self):
-        pass
-    
-    def vote(self):
-        pass
-    
-    def comment(self):
-        pass
-
-class Clan:
-    def __init__(self, name, description, profile_pricture=None):
-        self.name = name
-        self.description = description
-        self.profile_picture = profile_picture
-    
-    def create_clan(self):
-        return f"self.name clan successfully created!"
-    
-    def create_event(self):
-        pass
-    
-    def create_post(self):
-        pass
-
+@dataclass
 class Car:
-    def __init__(self, description, picture=None):
-        self.description = description
-        self.picture = picture
-    
+    owner: User
+    description: str
+    picture: str | None = None
+    ratings: list["Rating"] = field(default_factory=list)
+
+    def average_rating(self):
+        return sum(r.score for r in self.ratings) / len(self.ratings) if self.ratings else 0
+
+@dataclass
+class Rating:
+    car: Car
+    vote: User
+    score: int
+
+@dataclass
+class Clan:
+    name: str
+    description: str
+    owner: User
+    profile_picture: str | None = None
+    members: list[User] = field(default_factory=list)
+    events: list["Event"] = field(default_factory=list)
+
+@dataclass
+class Event:
+    clan: Clan
+    name: str
+    description: str
+    date: datetime
+    location: str
+    picture: str | None = None
+    results: list["EventResult"] = field(default_factory=list)
+
+@dataclass
+class EventResult:
+    event: Event
+    car: Car
+    position: int
+    score: int
+    category: str
+    resulted_at: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
 class Post:
-    def __init__(self, content, picture=None):
-        self.content = content
-        self.picture = picture
-    
-    def create_post(self):
-        pass
-    
-    def edit_post(self):
-        pass
-    
-    def delete_post(self):
-        pass
-    
+    author: User
+    content: str
+    picture: str | None = None
+    comments: list["Comment"] = field(default_factory=list)
+    posted_at: datetime = field(default_factory=datetime.now)
 
+
+@dataclass
 class Comment:
-    def __init__(self, content):
-        self.cotent = content
-    
-    def create_comment(self):
-        pass
-    
-    def delete_comment(self):
-        pass
-    
+    post: Post
+    user: User
+    content: str
+    created_at: datetime = field(default_factory=datetime.now)
 
-   
-class Events:
-    def __init__(self, name, description, date, location, picture=None):
-        self.name = name
-        self.description = description 
-        self.date = date 
-        self.location = location
-        self.picture = picture
-    
-    def edit_event():
-        pass
-    
-    def delete_event(self):
-        pass
+def leaderboard(car: list[Car]):
+    leaderboard_data = []
+    for c in car:
+        avg_rating = c.average_rating()
+        leaderboard_data.append({
+            "username": c.owner.username,
+            "average_rating": avg_rating
+        })
 
-class EventCompetitionResults:
-    def __init__(self, position, category, score):
-        self.position = position
-        self.category = category
-        self.score = score
-    
-    def add_result(self):
-        pass
-    
-    def update_results(self):
-        pass
+    leaderboard_data.sort(key=lambda x: x["average_rating"], reverse=True)
+
+    return leaderboard_data
+
