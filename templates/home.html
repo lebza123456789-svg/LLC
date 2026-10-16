@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLC | LowLifeCulture</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+
+<body>
+
+    <!-- TOP NAVIGATION -->
+    <header class="topbar">
+        <a href="{{ url_for('home') }}" class="logo">
+            LLC<span>.</span>
+            <small>LOWLIFECULTURE</small>
+        </a>
+
+        <div class="top-actions">
+            <button class="icon-btn" aria-label="Search">⌕</button>
+
+            <button class="icon-btn" aria-label="Notifications">
+                ♧
+            </button>
+
+            <a href="{{ url_for('login') }}" class="icon-btn garage-btn" title="Garage" aria-label="Garage">🚘</a>
+
+            <a href="{{ url_for('login') }}" class="profile-btn" title="Profile" aria-label="Profile">👤</a>
+        </div>
+    </header>
+
+    <!-- MAIN SOCIAL FEED -->
+    <main class="page-layout">
+
+        <section class="feed-column">
+
+            <div class="feed-heading">
+                <div>
+                    <p class="eyebrow">THE CAR CULTURE COMMUNITY</p>
+                    <h1>Your Feed<span>.</span></h1>
+                    <p class="muted">
+                        Builds, people and culture. All in one place.
+                    </p>
+                </div>
+            </div>
+
+            <!-- CREATE POST PROMPT -->
+            <div class="create-post">
+                <div class="create-avatar">LLC</div>
+
+                <a href="{{ url_for('login') }}" class="post-prompt">
+                    What's happening with your build?
+                </a>
+
+                <a href="{{ url_for('create_post') }}" class="create-button">＋</a>
+            </div>
+
+            <!-- REAL POSTS FROM SQLITE -->
+            <div class="feed-posts">
+
+                {% if posts %}
+                {% for post in posts %}
+
+                <article class="post-card">
+
+                    <div class="post-header">
+                        <div class="post-avatar">
+                            {{ (post['username'] or 'L')[0]|upper }}
+                        </div>
+
+                        <div class="post-user">
+                            <strong>
+                                {{ post['username'] or 'LLC Member' }}
+                            </strong>
+                            <small>
+                                {{ post['posted_at'] or 'Community post' }}
+                            </small>
+                        </div>
+
+                        <button class="more-btn" aria-label="More options">···</button>
+                    </div>
+
+                    {% if post['content'] %}
+                    <div class="post-caption">
+                        {{ post['content'] }}
+                    </div>
+                    {% endif %}
+
+                    {% if post['picture'] %}
+                    <div class="post-media">
+                        <img src="{{ url_for('static', filename=post['picture']) }}"
+                            alt="Photo shared by {{ post['username'] or 'an LLC member' }}" loading="lazy">
+                    </div>
+                    {% endif %}
+
+                    <div class="post-actions">
+
+
+                        <button type="button" class="like-button" data-post-id="{{ post['id'] }}"
+                            data-liked="{{ 'true' if post['liked_by_me'] else 'false' }}">
+                            <span class="like-label">
+                                {{ '❤️ Liked' if post['liked_by_me'] else '🤍 Like' }}
+                            </span>
+                            <span class="like-count">{{ post['like_count'] }}</span>
+                        </button>
+
+
+
+                        <button type="button" aria-label="Share post">
+                            ↗ <span>Share</span>
+                        </button>
+                    </div>
+
+                </article>
+
+                {% endfor %}
+                {% else %}
+
+                <div class="empty-feed">
+                    <div class="empty-icon">↗</div>
+                    <h2>The scene starts here.</h2>
+                    <p>
+                        No posts yet. Be one of the first to share
+                        your build, your sound system or your latest meet.
+                    </p>
+                    <a href="{{ url_for('register') }}" class="primary-button">
+                        Join the community
+                    </a>
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+
+            <!-- CAR LEADERBOARD -->
+            <div class="sidebar-card">
+                <p class="eyebrow">THE COMMUNITY</p>
+                <h2>Top <span>builds.</span></h2>
+                <p class="muted">The cars getting the most love.</p>
+
+                <div class="leaderboard-list">
+                    {% if leaderboard %}
+                    {% for car in leaderboard %}
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank">
+                            {% if loop.index == 1 %}
+                            🥇
+                            {% elif loop.index == 2 %}
+                            🥈
+                            {% elif loop.index == 3 %}
+                            🥉
+                            {% else %}
+                            {{ loop.index }}
+                            {% endif %}
+                        </span>
+
+                        <div class="leaderboard-info">
+                            <strong>{{ car['username'] }}</strong>
+                            <small>{{ car['description'] }}</small>
+                        </div>
+
+                        <span class="leaderboard-score">
+                            ❤️ {{ car['likes'] }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="muted">
+                        The leaderboard is waiting for its first builds.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- UPCOMING EVENTS -->
+            <div class="sidebar-card">
+                <p class="eyebrow">WHAT'S HAPPENING</p>
+                <h3>Upcoming events</h3>
+
+                {% if upcoming_events %}
+                {% for event in upcoming_events %}
+                <div class="event-preview">
+                    <div>
+                        <strong>{{ event['name'] }}</strong>
+                        <small>
+                            {{ event['date'] }}
+                            {% if event['location'] %}
+                            · {{ event['location'] }}
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-events">
+                    <span class="event-icon">▦</span>
+                    <strong>No upcoming events yet</strong>
+                    <p class="muted">
+                        Check back soon for the next meet.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+
+        </aside>
+
+
+        <p class="sidebar-footer">
+            LLC · LOWLIFECULTURE<br>
+            BUILT FOR THE CULTURE.
+        </p>
+
+        </aside>
+
+    </main>
+
+    <!-- FLOATING BOTTOM NAVIGATION -->
+    <nav class="bottom-nav" aria-label="Main navigation">
+
+        <a href="{{ url_for('home') }}" class="bottom-nav-link active">
+            <span class="nav-icon">⌂</span>
+            <small>Home</small>
+        </a>
+
+        <a href="{{ url_for('login') }}" class="bottom-nav-link">
+            <span class="nav-icon">⌕</span>
+            <small>Explore</small>
+        </a>
+
+        <a href="{{ url_for('create_post') }}" class="bottom-nav-link create-nav">
+            <span class="create-nav-icon">＋</span>
+            <small>Create</small>
+        </a>
+
+        <a href="{{ url_for('login') }}" class="bottom-nav-link">
+            <span class="nav-icon">♧</span>
+            <small>Clans</small>
+        </a>
+
+        <a href="{{ url_for('login') }}" class="bottom-nav-link">
+            <span class="nav-icon">▦</span>
+            <small>Events</small>
+        </a>
+
+    </nav>
+    <script src="{{ url_for('static', filename='likes.js') }}"></script>
+
+</body>
+
+</html>
