@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLC | Create Account</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+</head>
+
+<body>
+    <div class="register-container">
+
+        <div class="logo">LLC</div>
+
+        <p class="subtitle">
+            LowLifeCulture — Built for car culture.
+        </p>
+
+        <h2>Create Your Account</h2>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <p class="flash-message {{ category }}">{{ message }}</p>
+        {% endfor %}
+        {% endwith %}
+
+        <form action="{{ url_for('register') }}" method="POST">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" minlength="3"
+                    maxlength="30" autocomplete="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="email"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" minlength="8"
+                    autocomplete="new-password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password"
+                    placeholder="Enter your password again" minlength="8" autocomplete="new-password" required>
+            </div>
+
+            <button type="submit">Create Account</button>
+
+        </form>
+
+        <p class="login-link">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Log in</a>
+        </p>
+
+        <p class="login-link">
+            <a href="{{ url_for('home') }}">Back to Home</a>
+        </p>
+
+    </div>
+</body>
+
+</html>
