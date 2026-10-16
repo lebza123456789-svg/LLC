@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>LLC | Welcome Back</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+
+<body>
+
+    <main class="login-wrapper">
+
+        <section class="brand-panel">
+            <div class="brand-top">
+                <span class="brand-mark">LLC<span class="dot">.</span></span>
+                <span class="brand-tag">LOWLIFECULTURE</span>
+            </div>
+
+            <div class="brand-message">
+                <p class="eyebrow">MORE THAN JUST CARS</p>
+
+                <h1>BUILT BY<br>
+                    <span>THE CULTURE.</span>
+                </h1>
+
+                <p class="brand-description">
+                    Your cars. Your crew. Your scene.
+                    Welcome to the community that lives and breathes automotive culture.
+                </p>
+            </div>
+
+            <div class="brand-bottom">
+                <span class="orange-line"></span>
+                <p>FIND YOUR PEOPLE. BUILD YOUR LEGACY.</p>
+            </div>
+        </section>
+
+        <section class="login-panel">
+
+            <a class="back-link" href="{{ url_for('home') }}">
+                &larr; Back to home
+            </a>
+
+            <div class="mobile-logo">LLC<span>.</span></div>
+
+            <div class="form-heading">
+                <p class="eyebrow">YOUR SCENE IS WAITING</p>
+                <h2>WELCOME BACK.</h2>
+                <p class="form-subtitle">
+                    Sign in to get back in the driver's seat.
+                </p>
+            </div>
+
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+            <p class="flash-message {{ category }}">{{ message }}</p>
+            {% endfor %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+
+                <div class="form-group">
+                    <label for="username">USERNAME OR EMAIL</label>
+
+                    <input type="text" id="username" name="username" placeholder="Enter your username or email"
+                        autocomplete="username" required>
+                </div>
+
+                <div class="form-group">
+                    <div class="password-label">
+                        <label for="password">PASSWORD</label>
+                    </div>
+
+                    <input type="password" id="password" name="password" placeholder="Enter your password"
+                        autocomplete="current-password" required>
+                </div>
+
+                <button type="submit">
+                    SIGN IN <span>&rarr;</span>
+                </button>
+
+            </form>
+
+            <div class="separator">
+                <span>NEW TO THE CULTURE?</span>
+            </div>
+
+            <a class="register-button" href="{{ url_for('register') }}">
+                CREATE YOUR ACCOUNT
+            </a>
+
+            <p class="terms">
+                By signing in, you agree to use LLC responsibly
+                and respect the community.
+            </p>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>
