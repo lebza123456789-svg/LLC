@@ -85,3 +85,18 @@ def leaderboard(car: list[Car]):
 
     return leaderboard_data
 
+@dataclass
+class Garage:
+    id: int
+    user_id: int
+    description: str
+    picture: str
+    created_at: datetime
+
+@dataclass
+class Like:
+    id: int
+    user_id: int
+    car_id: int
+    created_at: datetime
+
