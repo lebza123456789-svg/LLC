@@ -1,7 +1,9 @@
 import sqlite3
+from pathlib import Path
 
-connection = sqlite3.connect("llc")
+DATABASE = Path(__file__).resolve().parent / "llc"
 
+connection = sqlite3.connect(DATABASE)
 cursor = connection.cursor()
 
 cursor.execute("""
@@ -54,7 +56,7 @@ UNIQUE (NAME)
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS clan_members(
 id INTEGER PRIMARY KEY AUTOINCREMENT,
-clan_id INTERGER NOT NULL,
+clan_id INTEGER NOT NULL,
 user_id INTEGER NOT NULL,
 FOREIGN KEY (clan_id) REFERENCES clans(id)
 )
@@ -108,7 +110,7 @@ post_id INTEGER NOT NULL,
 user_id INTEGER NOT NULL,
 content TEXT NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-FOREIGN KEY (post_id) REFERENCES posts(id)
+FOREIGN KEY (post_id) REFERENCES posts(id),
 FOREIGN KEY (user_id) REFERENCES users(id)
 )
 """)
@@ -121,3 +123,8 @@ description TEXT NOT NULL,
 picture TEXT NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (user_id) REFERENCES users(id) )""")
+
+connection.commit()
+connection.close()
+
+print("LLC database setup completed")
