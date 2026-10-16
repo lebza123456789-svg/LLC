@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='create_post.css') }}">
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="logo" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <a class="back-link" href="{{ url_for('home') }}">Back to feed</a>
+    </header>
+
+    <main class="create-container">
+        <h1>Create a post</h1>
+        <p class="subtitle">Share your build with the LowLifeCulture community.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <p class="message {{ category }}">{{ message }}</p>
+        {% endfor %}
+        {% endwith %}
+
+        <form action="{{ url_for('create_post') }}" method="POST" enctype="multipart/form-data">
+
+            <label for="content">Caption</label>
+            <textarea id="content" name="content" placeholder="Tell the community about your car..." maxlength="2000"
+                rows="5"></textarea>
+
+            <label for="picture">Car photo</label>
+            <input id="picture" type="file" name="picture" accept="image/png,image/jpeg,image/webp" required>
+
+            <button type="submit">Publish post</button>
+        </form>
+    </main>
+</body>
+
+</html>
