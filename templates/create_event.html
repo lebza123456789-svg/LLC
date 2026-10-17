@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create an event | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='events.css') }}">
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <nav><a href="{{ url_for('events') }}">Events</a></nav>
+    </header>
+
+    <main class="container form-container">
+        <a class="back-link" href="{{ url_for('events') }}">← Back to events</a>
+
+        <section class="form-panel">
+            <p class="eyebrow">CLAN MANAGEMENT / EVENTS</p>
+            <h1>Host a meet<span>.</span></h1>
+            <p class="form-intro">
+                Create an event for <strong>{{ clan['name'] }}</strong>.
+            </p>
+
+            {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+            <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data">
+                <label for="name">Event name</label>
+                <input id="name" name="name" maxlength="120" placeholder="e.g. Sunday Stance Meet" required>
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" maxlength="5000" rows="5"
+                    placeholder="What's happening at this event?" required></textarea>
+
+                <label for="date">Event date</label>
+                <input id="date" name="date" type="date" min="{{ today }}" required>
+
+                <label for="location">Location</label>
+                <input id="location" name="location" maxlength="200" placeholder="Venue, town or city" required>
+
+                <label for="picture">Event cover photo</label>
+                <input id="picture" name="picture" type="file" accept=".jpg,.jpeg,.png,.webp" required>
+
+                <button class="button-link submit-button" type="submit">
+                    Publish event →
+                </button>
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>
