@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 from pathlib import Path
 from werkzeug.utils import secure_filename 
 import uuid
 import os
+from datetime import  date
 
 from flask import jsonify
 
@@ -17,7 +18,7 @@ DATABASE = Path(__file__).resolve().parent / "llc"
 def get_db():
     connection = sqlite3.connect("llc")
     connection.row_factory = sqlite3.Row
-    connection.execute("PRAGMA foreign_keys = on")
+    connection.execute("PRAGMA foreign_keys = ON")
     return connection
 
 
@@ -308,7 +309,372 @@ def like_post(post_id):
     finally:
         connection.close()
 
+@app.route("/profile/<username>")
+def profile(username):
+    connection = get_db()
 
+    try:
+        user = connection.execute(
+            """
+            SELECT id, username, profile_picture, location, created_at
+            FROM users
+            WHERE username = ?
+            """,
+            (username,)
+        ).fetchone()
+
+        if user is None:
+            return "User not found", 404
+
+        user_id = user["id"]
+
+        posts = connection.execute(
+            """
+            SELECT posts.id, posts.content, posts.picture, posts.posted_at,
+                   (
+                       SELECT COUNT(*)
+                       FROM post_likes
+                       WHERE post_likes.post_id = posts.id
+                   ) AS like_count
+            FROM posts
+            WHERE posts.user_id = ?
+            ORDER BY posts.posted_at DESC, posts.id DESC
+            """,
+            (user_id,)
+        ).fetchall()
+
+        cars = connection.execute(
+            """
+            SELECT id, description, picture, created_at
+            FROM garage
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            """,
+            (user_id,)
+        ).fetchall()
+
+        likes_received = connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM post_likes
+            JOIN posts ON posts.id = post_likes.post_id
+            WHERE posts.user_id = ?
+            """,
+            (user_id,)
+        ).fetchone()[0]
+
+        return render_template(
+            "profile.html",
+            user=user,
+            posts=posts,
+            cars=cars,
+            likes_received=likes_received,
+            is_own_profile=session.get("user_id") == user_id
+        )
+
+    finally:
+        connection.close()
+
+
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+
+
+def allowed_file(filename):
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
+
+
+@app.route("/garage")
+def garage():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    connection = get_db()
+
+    cars = connection.execute("""
+        SELECT id, description, picture, created_at
+        FROM garage
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+    """, (session["user_id"],)).fetchall()
+
+    connection.close()
+
+    return render_template("garage.html", cars=cars)
+
+
+@app.route("/garage/add", methods=["POST"])
+def add_garage_car():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    description = request.form.get("description", "").strip()
+    picture = request.files.get("picture")
+
+    if not description:
+        flash("Please add a description for your car.")
+        return redirect(url_for("garage"))
+
+    if not picture or not picture.filename:
+        flash("Please choose a car photo.")
+        return redirect(url_for("garage"))
+
+    if not allowed_file(picture.filename):
+        flash("Use a JPG, JPEG, PNG or WEBP image.")
+        return redirect(url_for("garage"))
+
+    upload_folder = Path(app.root_path) / "static" / "uploads"
+    upload_folder.mkdir(parents=True, exist_ok=True)
+
+    extension = secure_filename(picture.filename).rsplit(".", 1)[1].lower()
+    filename = f"{uuid.uuid4().hex}.{extension}"
+    picture.save(upload_folder / filename)
+
+    connection = get_db()
+
+    try:
+        connection.execute("""
+            INSERT INTO garage (user_id, description, picture)
+            VALUES (?, ?, ?)
+        """, (
+            session["user_id"],
+            description,
+            f"uploads/{filename}"
+        ))
+
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        (upload_folder / filename).unlink(missing_ok=True)
+        raise
+    finally:
+        connection.close()
+
+    flash("Your car was added to your garage!")
+    return redirect(url_for("garage"))
+
+# FUNCTION FOR THE EVENT PSOTING 
+
+ALLOWED_EVENT_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
+
+
+def event_image_allowed(filename):
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower()
+        in ALLOWED_EVENT_EXTENSIONS
+    )
+
+
+def get_event_or_404(connection, event_id):
+    event = connection.execute("""
+        SELECT
+            e.id,
+            e.clan_id,
+            e.name,
+            e.description,
+            e.date,
+            e.location,
+            e.picture,
+            e.created_at,
+            c.name AS clan_name
+        FROM events e
+        JOIN clans c ON c.id = e.clan_id
+        WHERE e.id = ?
+    """, (event_id,)).fetchone()
+
+    if event is None:
+        abort(404)
+
+    return event
+
+
+@app.route("/events")
+def events():
+    connection = get_db()
+
+    try:
+        upcoming_events = connection.execute("""
+            SELECT
+                e.id,
+                e.name,
+                e.description,
+                e.date,
+                e.location,
+                e.picture,
+                c.name AS clan_name
+            FROM events e
+            JOIN clans c ON c.id = e.clan_id
+            WHERE date(e.date) >= date('now', 'localtime')
+            ORDER BY date(e.date) ASC, e.id DESC
+        """).fetchall()
+    finally:
+        connection.close()
+
+    return render_template(
+        "events.html",
+        events=upcoming_events
+    )
+
+
+@app.route("/events/<int:event_id>")
+def event_detail(event_id):
+    connection = get_db()
+
+    try:
+        event = get_event_or_404(connection, event_id)
+    finally:
+        connection.close()
+
+    return render_template(
+        "event_detail.html",
+        event=event
+    )
+
+
+@app.route(
+    "/clans/<int:clan_id>/events/create",
+    methods=["GET", "POST"]
+)
+def create_event(clan_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    connection = get_db()
+
+    try:
+        clan = connection.execute("""
+            SELECT id, name, owner_id
+            FROM clans
+            WHERE id = ?
+        """, (clan_id,)).fetchone()
+
+        if clan is None:
+            abort(404)
+
+        # Only the clan owner may create an event.
+        if clan["owner_id"] != session["user_id"]:
+            abort(403)
+
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            description = request.form.get(
+                "description", ""
+            ).strip()
+            event_date = request.form.get("date", "").strip()
+            location = request.form.get("location", "").strip()
+            picture = request.files.get("picture")
+
+            if not all([name, description, event_date, location]):
+                flash("Please complete all event fields.")
+                return render_template(
+                    "create_event.html", clan=clan
+                )
+
+            try:
+                parsed_date = date.fromisoformat(event_date)
+            except ValueError:
+                flash("Please enter a valid event date.")
+                return render_template(
+                    "create_event.html",
+                    clan=clan,
+                    today=date.today().isoformat()
+                )
+
+            if parsed_date < date.today():
+                flash("An event date cannot be in the past.")
+                return render_template(
+                    "create_event.html", clan=clan
+                )
+
+            if len(name) > 120 or len(location) > 200:
+                flash("The event name or location is too long.")
+                return render_template(
+                    "create_event.html", clan=clan
+                )
+
+            if len(description) > 5000:
+                flash("The description must be 5000 characters or less.")
+                return render_template(
+                    "create_event.html", clan=clan
+                )
+
+            if not picture or not picture.filename:
+                flash("Please upload an event photo.")
+                return render_template(
+                    "create_event.html", clan=clan
+                )
+
+            if not event_image_allowed(picture.filename):
+                flash("Use a JPG, JPEG, PNG or WEBP photo.")
+                return render_template(
+                    "create_event.html", clan=clan
+                )
+
+            upload_folder = (
+                Path(app.root_path) / "static" / "uploads"
+            )
+            upload_folder.mkdir(parents=True, exist_ok=True)
+
+            extension = secure_filename(
+                picture.filename
+            ).rsplit(".", 1)[1].lower()
+
+            filename = f"{uuid.uuid4().hex}.{extension}"
+            saved_path = upload_folder / filename
+            picture_saved = False
+
+            try:
+                picture.save(saved_path)
+                picture_saved = True
+
+                cursor = connection.execute("""
+                    INSERT INTO events (
+                        clan_id,
+                        name,
+                        description,
+                        date,
+                        location,
+                        picture
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    clan_id,
+                    name,
+                    description,
+                    event_date,
+                    location,
+                    f"uploads/{filename}"
+                ))
+
+                connection.commit()
+                new_event_id = cursor.lastrowid
+
+            except Exception:
+                connection.rollback()
+
+                if picture_saved:
+                    saved_path.unlink(missing_ok=True)
+
+                raise
+
+            flash("Your clan event has been created!")
+            return redirect(
+                url_for(
+                    "event_detail",
+                    event_id=new_event_id
+                )
+            )
+
+        return render_template(
+            "create_event.html",
+            clan=clan,
+            today=date.today().isoformat()
+        )
+    finally:
+        connection.close()
 
 
 if __name__ == "__main__":
