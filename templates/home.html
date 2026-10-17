@@ -4,254 +4,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>LLC | LowLifeCulture</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
 </head>
 
 <body>
+    <div class="app-layout">
 
-    <!-- TOP NAVIGATION -->
-    <header class="topbar">
-        <a href="{{ url_for('home') }}" class="logo">
-            LLC<span>.</span>
-            <small>LOWLIFECULTURE</small>
-        </a>
+        <!-- DESKTOP SIDEBAR -->
+        <aside class="sidebar">
+            <a href="{{ url_for('home') }}" class="brand">
+                <span class="brand-mark">LLC</span>
+                <span class="brand-name">LOWLIFECULTURE</span>
+            </a>
 
-        <div class="top-actions">
-            <button class="icon-btn" aria-label="Search">⌕</button>
-
-            <button class="icon-btn" aria-label="Notifications">
-                ♧
-            </button>
-
-            <a href="{{ url_for('login') }}" class="icon-btn garage-btn" title="Garage" aria-label="Garage">🚘</a>
-
-            <a href="{{ url_for('login') }}" class="profile-btn" title="Profile" aria-label="Profile">👤</a>
-        </div>
-    </header>
-
-    <!-- MAIN SOCIAL FEED -->
-    <main class="page-layout">
-
-        <section class="feed-column">
-
-            <div class="feed-heading">
-                <div>
-                    <p class="eyebrow">THE CAR CULTURE COMMUNITY</p>
-                    <h1>Your Feed<span>.</span></h1>
-                    <p class="muted">
-                        Builds, people and culture. All in one place.
-                    </p>
-                </div>
-            </div>
-
-            <!-- CREATE POST PROMPT -->
-            <div class="create-post">
-                <div class="create-avatar">LLC</div>
-
-                <a href="{{ url_for('login') }}" class="post-prompt">
-                    What's happening with your build?
+            <nav class="side-navigation">
+                <a href="{{ url_for('home') }}" class="nav-link active">
+                    <span class="nav-icon">⌂</span>
+                    <span>Home</span>
                 </a>
 
-                <a href="{{ url_for('create_post') }}" class="create-button">＋</a>
+                <a href="#explore" class="nav-link">
+                    <span class="nav-icon">⌕</span>
+                    <span>Explore</span>
+                </a>
+
+                <a href="#garage" class="nav-link">
+                    <span class="nav-icon">▣</span>
+                    <span>My Garage</span>
+                </a>
+
+                <a href="#clans" class="nav-link">
+                    <span class="nav-icon">♧</span>
+                    <span>Clans</span>
+                </a>
+
+                <a href="#events" class="nav-link">
+                    <span class="nav-icon">▦</span>
+                    <span>Events</span>
+                </a>
+
+                <a href="#challenges" class="nav-link">
+                    <span class="nav-icon">♛</span>
+                    <span>Challenges</span>
+                </a>
+
+                {% if session.get('username') %}
+                <a href="{{ url_for('profile',
+                                 username=session.get('username')) }}" class="nav-link">
+                    <span class="nav-icon">◎</span>
+                    <span>My Profile</span>
+                </a>
+                {% endif %}
+            </nav>
+
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('create_post') }}" class="create-button">
+                <span>＋</span> Create post
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="create-button">
+                <span>＋</span> Join LLC
+            </a>
+            {% endif %}
+
+            <div class="sidebar-footer">
+                <span class="status-dot"></span>
+                BUILT FOR THE CULTURE.
             </div>
-
-            <!-- REAL POSTS FROM SQLITE -->
-            <div class="feed-posts">
-
-                {% if posts %}
-                {% for post in posts %}
-
-                <article class="post-card">
-
-                    <div class="post-header">
-                        <div class="post-avatar">
-                            {{ (post['username'] or 'L')[0]|upper }}
-                        </div>
-
-                        <div class="post-user">
-                            <strong>
-                                {{ post['username'] or 'LLC Member' }}
-                            </strong>
-                            <small>
-                                {{ post['posted_at'] or 'Community post' }}
-                            </small>
-                        </div>
-
-                        <button class="more-btn" aria-label="More options">···</button>
-                    </div>
-
-                    {% if post['content'] %}
-                    <div class="post-caption">
-                        {{ post['content'] }}
-                    </div>
-                    {% endif %}
-
-                    {% if post['picture'] %}
-                    <div class="post-media">
-                        <img src="{{ url_for('static', filename=post['picture']) }}"
-                            alt="Photo shared by {{ post['username'] or 'an LLC member' }}" loading="lazy">
-                    </div>
-                    {% endif %}
-
-                    <div class="post-actions">
+        </aside>
 
 
-                        <button type="button" class="like-button" data-post-id="{{ post['id'] }}"
-                            data-liked="{{ 'true' if post['liked_by_me'] else 'false' }}">
-                            <span class="like-label">
-                                {{ '❤️ Liked' if post['liked_by_me'] else '🤍 Like' }}
-                            </span>
-                            <span class="like-count">{{ post['like_count'] }}</span>
-                        </button>
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- MOBILE HEADER -->
+            <header class="mobile-header">
+                <a href="{{ url_for('home') }}" class="brand">
+                    <span class="brand-mark">LLC</span>
+                    <span class="brand-name">LOWLIFECULTURE</span>
+                </a>
+
+                <div class="mobile-header-actions">
+                    <a href="#explore" class="header-icon" aria-label="Explore">⌕</a>
+                    <a href="#notifications" class="header-icon" aria-label="Notifications">♡</a>
+                </div>
+            </header>
 
 
+            <!-- DESKTOP TOP BAR -->
+            <header class="desktop-topbar">
+                <div>
+                    <p class="eyebrow">THE COMMUNITY FEED</p>
+                    <h1>Discover the culture.</h1>
+                </div>
 
-                        <button type="button" aria-label="Share post">
-                            ↗ <span>Share</span>
-                        </button>
-                    </div>
-
-                </article>
-
-                {% endfor %}
-                {% else %}
-
-                <div class="empty-feed">
-                    <div class="empty-icon">↗</div>
-                    <h2>The scene starts here.</h2>
-                    <p>
-                        No posts yet. Be one of the first to share
-                        your build, your sound system or your latest meet.
-                    </p>
-                    <a href="{{ url_for('register') }}" class="primary-button">
-                        Join the community
+                <div class="topbar-actions">
+                    <a href="#explore" class="search-box">
+                        <span>⌕</span>
+                        <span>Discover builds and people</span>
                     </a>
-                </div>
 
-                {% endif %}
-
-            </div>
-
-        </section>
-
-
-        <!-- RIGHT SIDEBAR -->
-        <aside class="right-sidebar">
-
-            <!-- CAR LEADERBOARD -->
-            <div class="sidebar-card">
-                <p class="eyebrow">THE COMMUNITY</p>
-                <h2>Top <span>builds.</span></h2>
-                <p class="muted">The cars getting the most love.</p>
-
-                <div class="leaderboard-list">
-                    {% if leaderboard %}
-                    {% for car in leaderboard %}
-                    <div class="leaderboard-item">
-                        <span class="leaderboard-rank">
-                            {% if loop.index == 1 %}
-                            🥇
-                            {% elif loop.index == 2 %}
-                            🥈
-                            {% elif loop.index == 3 %}
-                            🥉
-                            {% else %}
-                            {{ loop.index }}
-                            {% endif %}
-                        </span>
-
-                        <div class="leaderboard-info">
-                            <strong>{{ car['username'] }}</strong>
-                            <small>{{ car['description'] }}</small>
-                        </div>
-
-                        <span class="leaderboard-score">
-                            ❤️ {{ car['likes'] }}
-                        </span>
-                    </div>
-                    {% endfor %}
+                    {% if session.get('username') %}
+                    <a class="topbar-avatar" href="{{ url_for('profile',
+                                    username=session.get('username')) }}">
+                        {{ session.get('username', 'U')[0]|upper }}
+                    </a>
                     {% else %}
-                    <p class="muted">
-                        The leaderboard is waiting for its first builds.
-                    </p>
+                    <a class="login-link" href="{{ url_for('login') }}">Log in</a>
                     {% endif %}
                 </div>
-            </div>
+            </header>
 
-            <!-- UPCOMING EVENTS -->
-            <div class="sidebar-card">
-                <p class="eyebrow">WHAT'S HAPPENING</p>
-                <h3>Upcoming events</h3>
 
-                {% if upcoming_events %}
-                {% for event in upcoming_events %}
-                <div class="event-preview">
-                    <div>
-                        <strong>{{ event['name'] }}</strong>
-                        <small>
-                            {{ event['date'] }}
-                            {% if event['location'] %}
-                            · {{ event['location'] }}
+            <!-- MOBILE PAGE INTRO -->
+            <section class="mobile-intro">
+                <p class="eyebrow">YOUR SCENE. YOUR PEOPLE.</p>
+                <h1>Discover the culture.</h1>
+                <p>Builds, people and everything automotive.</p>
+            </section>
+
+
+            <div class="content-grid">
+
+                <!-- SOCIAL FEED -->
+                <section class="feed-column">
+
+                    <!-- CREATE POST PROMPT -->
+                    <section class="composer">
+                        <div class="composer-avatar">
+                            {% if session.get('username') %}
+                            {{ session.get('username')[0]|upper }}
+                            {% else %}
+                            L
                             {% endif %}
-                        </small>
+                        </div>
+
+                        <div class="composer-content">
+                            <h2>What's happening with your build?</h2>
+                            <p>Share your latest car photos with the community.</p>
+                        </div>
+
+                        {% if session.get('user_id') %}
+                        <a href="{{ url_for('create_post') }}" class="composer-button">
+                            <span>＋</span>
+                            <span class="composer-button-text">Post</span>
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('login') }}" class="composer-button">
+                            Join
+                        </a>
+                        {% endif %}
+                    </section>
+
+
+                    <!-- FEED HEADING -->
+                    <div class="feed-heading">
+                        <div>
+                            <h2>Your feed</h2>
+                            <p>See what's happening in the scene.</p>
+                        </div>
+
+                        <span class="feed-label">
+                            <span class="status-dot"></span>
+                            COMMUNITY
+                        </span>
                     </div>
-                </div>
-                {% endfor %}
-                {% else %}
-                <div class="empty-events">
-                    <span class="event-icon">▦</span>
-                    <strong>No upcoming events yet</strong>
-                    <p class="muted">
-                        Check back soon for the next meet.
-                    </p>
-                </div>
-                {% endif %}
+
+
+                    <!-- POSTS -->
+                    {% for post in posts %}
+                    <article class="post-card">
+
+                        <header class="post-header">
+                            <a class="post-avatar" href="{{ url_for('profile',
+                                            username=post['username']) }}">
+                                {{ post['username'][0]|upper }}
+                            </a>
+
+                            <div class="post-author">
+                                <a class="post-username" href="{{ url_for('profile',
+                                                username=post['username']) }}">
+                                    {{ post['username'] }}
+                                </a>
+
+                                <span class="post-time">
+                                    {{ post['posted_at'] }}
+                                </span>
+                            </div>
+
+                            <button class="more-button" type="button" aria-label="More options">···</button>
+                        </header>
+
+
+                        {% if post['picture'] %}
+                        <div class="post-image-wrapper">
+                            <img class="post-image" src="{{ url_for('static',
+                                            filename=post['picture']) }}"
+                                alt="Car photo shared by {{ post['username'] }}" loading="lazy">
+                        </div>
+                        {% endif %}
+
+
+                        <div class="post-details">
+
+                            <div class="post-actions">
+                                {% if session.get('user_id') %}
+                                <button type="button" class="like-button
+                                {% if post['liked_by_me'] %}is-liked{% endif %}" data-post-id="{{ post['id'] }}"
+                                    data-liked="{{ 'true' if post['liked_by_me'] else 'false' }}"
+                                    aria-label="Like post">
+
+                                    <span class="like-label">
+                                        {{ '♥' if post['liked_by_me'] else '♡' }}
+                                    </span>
+                                </button>
+                                {% else %}
+                                <a href="{{ url_for('login') }}" class="action-icon" aria-label="Log in to like">♡</a>
+                                {% endif %}
+
+                                <button type="button" class="action-icon" aria-label="Share"
+                                    onclick="if (navigator.share) { navigator.share({url: window.location.href, title: 'LLC - LowLifeCulture'}); } else { navigator.clipboard.writeText(window.location.href); }">
+                                    ↗
+                                </button>
+
+                                <span class="action-spacer"></span>
+
+                                <span class="post-tag">LLC COMMUNITY</span>
+                            </div>
+
+
+                            <p class="like-count-line">
+                                <strong class="like-count">
+                                    {{ post['like_count'] }}
+                                </strong>
+                                <span>likes</span>
+                            </p>
+
+
+                            {% if post['content'] %}
+                            <p class="post-caption">
+                                <a href="{{ url_for('profile',
+                                                username=post['username']) }}" class="caption-username">
+                                    {{ post['username'] }}
+                                </a>
+                                {{ post['content'] }}
+                            </p>
+                            {% endif %}
+
+                        </div>
+                    </article>
+
+                    {% else %}
+                    <section class="empty-feed">
+                        <div class="empty-feed-icon">↗</div>
+                        <h2>The scene starts here.</h2>
+                        <p>
+                            There aren't any posts yet. Be one of the first
+                            to share a build with the LLC community.
+                        </p>
+
+                        {% if session.get('user_id') %}
+                        <a href="{{ url_for('create_post') }}" class="create-button empty-create">
+                            ＋ Share your first post
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('register') }}" class="create-button empty-create">
+                            Join the community
+                        </a>
+                        {% endif %}
+                    </section>
+                    {% endfor %}
+
+                </section>
+
+
+                <!-- RIGHT-HAND DESKTOP PANEL -->
+                <aside class="right-column">
+
+                    <section class="welcome-panel">
+                        <p class="eyebrow">WELCOME TO LLC</p>
+                        <h2>Your build.<br>Your culture.</h2>
+                        <p>
+                            A community for the people who live and breathe cars.
+                        </p>
+
+                        {% if not session.get('user_id') %}
+                        <a href="{{ url_for('register') }}" class="panel-button">
+                            Join the community →
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('create_post') }}" class="panel-button">
+                            Share your build →
+                        </a>
+                        {% endif %}
+                    </section>
+
+
+                    <section class="side-panel">
+                        <div class="side-panel-heading">
+                            <h2>What's next?</h2>
+                        </div>
+
+                        <a href="#challenges" class="discovery-item">
+                            <span class="discovery-icon orange-icon">♛</span>
+                            <span>
+                                <strong>Challenges</strong>
+                                <small>Compete with other builds</small>
+                            </span>
+                            <span class="discovery-arrow">›</span>
+                        </a>
+
+                        <a href="#events" class="discovery-item">
+                            <span class="discovery-icon">▦</span>
+                            <span>
+                                <strong>Car meets</strong>
+                                <small>Discover the local scene</small>
+                            </span>
+                            <span class="discovery-arrow">›</span>
+                        </a>
+
+                        <a href="#clans" class="discovery-item">
+                            <span class="discovery-icon">♧</span>
+                            <span>
+                                <strong>Clans</strong>
+                                <small>Find your community</small>
+                            </span>
+                            <span class="discovery-arrow">›</span>
+                        </a>
+                    </section>
+
+
+                    <footer class="right-footer">
+                        <span>LOWLIFECULTURE</span>
+                        <span>Built for the culture.</span>
+                    </footer>
+
+                </aside>
+
             </div>
+        </main>
+    </div>
 
-        </aside>
 
-
-        <p class="sidebar-footer">
-            LLC · LOWLIFECULTURE<br>
-            BUILT FOR THE CULTURE.
-        </p>
-
-        </aside>
-
-    </main>
-
-    <!-- FLOATING BOTTOM NAVIGATION -->
-    <nav class="bottom-nav" aria-label="Main navigation">
-
-        <a href="{{ url_for('home') }}" class="bottom-nav-link active">
-            <span class="nav-icon">⌂</span>
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-bottom-nav" aria-label="Main navigation">
+        <a href="{{ url_for('home') }}" class="bottom-nav-item active">
+            <span>⌂</span>
             <small>Home</small>
         </a>
 
-        <a href="{{ url_for('login') }}" class="bottom-nav-link">
-            <span class="nav-icon">⌕</span>
+        <a href="#explore" class="bottom-nav-item">
+            <span>⌕</span>
             <small>Explore</small>
         </a>
 
-        <a href="{{ url_for('create_post') }}" class="bottom-nav-link create-nav">
-            <span class="create-nav-icon">＋</span>
-            <small>Create</small>
+        {% if session.get('user_id') %}
+        <a href="{{ url_for('create_post') }}" class="bottom-create" aria-label="Create post">＋</a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="bottom-create" aria-label="Join LLC">＋</a>
+        {% endif %}
+
+        <a href="#challenges" class="bottom-nav-item">
+            <span>♛</span>
+            <small>Challenges</small>
         </a>
 
-        <a href="{{ url_for('login') }}" class="bottom-nav-link">
-            <span class="nav-icon">♧</span>
-            <small>Clans</small>
+        {% if session.get('username') %}
+        <a href="{{ url_for('profile',
+                        username=session.get('username')) }}" class="bottom-nav-item">
+            <span>◎</span>
+            <small>Profile</small>
         </a>
-
-        <a href="{{ url_for('login') }}" class="bottom-nav-link">
-            <span class="nav-icon">▦</span>
-            <small>Events</small>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="bottom-nav-item">
+            <span>◎</span>
+            <small>Profile</small>
         </a>
-
+        {% endif %}
     </nav>
-    <script src="{{ url_for('static', filename='likes.js') }}"></script>
 
+
+    <script src="{{ url_for('static', filename='likes.js') }}"></script>
 </body>
 
 </html>
