@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit clan | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='clans.css') }}">
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="logo" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <nav>
+            <a href="{{ url_for('clans') }}">Clans</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="create-panel">
+            <h1>Edit clan</h1>
+
+            {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+            <p class="notice">{{ message }}</p>
+            {% endfor %}
+            {% endwith %}
+
+            <form method="POST" enctype="multipart/form-data">
+                <label for="name">Clan name</label>
+                <input id="name" name="name" value="{{ clan['name'] }}" maxlength="80" required>
+
+                <label for="description">Description</label>
+                <textarea id="description" name="description" maxlength="1000"
+                    required>{{ clan['description'] }}</textarea>
+
+                <label for="profile_picture">Clan profile picture</label>
+                <input id="profile_picture" type="file" name="profile_picture"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+
+                <label for="cover_picture">Clan cover image</label>
+                <input id="cover_picture" type="file" name="cover_picture"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+
+                <button type="submit">Save changes</button>
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>
