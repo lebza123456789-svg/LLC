@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ clan['name'] }} | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='clans.css') }}">
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="logo" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <nav>
+            <a href="{{ url_for('home') }}">Feed</a>
+            <a href="{{ url_for('events') }}">Events</a>
+            <a href="{{ url_for('clans') }}">Clans</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">LOWLIFECULTURE CLAN</p>
+            <h1>{{ clan['name'] }}</h1>
+            <p>{{ clan['description'] }}</p>
+            <p>{{ clan['member_count'] }} members</p>
+
+            {% if session.get('user_id') %}
+            {% if session['user_id'] == clan['owner_id'] %}
+            <a class="view-button" href="{{ url_for('create_event', clan_id=clan['id']) }}">
+                + Create event
+            </a>
+            {% else %}
+            <form action="{{ url_for('join_clan', clan_id=clan['id']) }}" method="POST">
+                <button type="submit">Join clan</button>
+            </form>
+            {% endif %}
+            {% endif %}
+        </section>
+
+        <section class="clan-section">
+            <h2>Members</h2>
+            {% if members %}
+            {% for member in members %}
+            <article class="clan-card clan-content">
+                <strong>{{ member['username'] }}</strong>
+            </article>
+            {% endfor %}
+            {% else %}
+            <p>No members yet.</p>
+            {% endif %}
+        </section>
+
+        <section class="clan-section">
+            <h2>Clan events</h2>
+            {% if events %}
+            {% for event in events %}
+            <article class="clan-card clan-content">
+                <h3>{{ event['name'] }}</h3>
+                <p>{{ event['date'] }} · {{ event['location'] }}</p>
+                <a class="view-button" href="{{ url_for('event_detail', event_id=event['id']) }}">
+                    View event →
+                </a>
+            </article>
+            {% endfor %}
+            {% else %}
+            <p>This clan has no events yet.</p>
+            {% endif %}
+        </section>
+
+        <p><a href="{{ url_for('clans') }}">← Back to clans</a></p>
+    </main>
+</body>
+
+</html>
