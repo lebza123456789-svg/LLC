@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user['username'] }} | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+</head>
+
+<body>
+    <header class="profile-topbar">
+        <a href="{{ url_for('home') }}" class="logo">LLC<span>.</span></a>
+        <a href="{{ url_for('home') }}" class="back-link">Back to feed</a>
+    </header>
+
+    <main class="profile-container">
+        <section class="profile-header">
+            {% if user['profile_picture'] %}
+            <img class="avatar" src="{{ url_for('static', filename=user['profile_picture']) }}" alt="Profile picture">
+            {% else %}
+            <div class="avatar avatar-placeholder">
+                {{ user['username'][0]|upper }}
+            </div>
+            {% endif %}
+
+            <div class="profile-info">
+                <h1>{{ user['username'] }}</h1>
+
+                {% if user['location'] %}
+                <p class="muted">{{ user['location'] }}</p>
+                {% else %}
+                <p class="muted">LLC Member</p>
+                {% endif %}
+
+                {% if is_own_profile %}
+                <a href="{{ url_for('home') }}" class="edit-button">
+                    My LLC feed
+                </a>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="stats">
+            <div class="stat">
+                <strong>{{ posts|length }}</strong>
+                <span>Posts</span>
+            </div>
+            <div class="stat">
+                <strong>{{ cars|length }}</strong>
+                <span>Cars</span>
+            </div>
+            <div class="stat">
+                <strong>{{ likes_received }}</strong>
+                <span>Likes received</span>
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <h2>My Garage</h2>
+
+            {% if cars %}
+            <div class="car-grid">
+                {% for car in cars %}
+                <article class="car-card">
+                    {% if car['picture'] %}
+                    <img src="{{ url_for('static', filename=car['picture']) }}"
+                        alt="Car belonging to {{ user['username'] }}">
+                    {% endif %}
+                    <p>{{ car['description'] }}</p>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">
+                No cars in the Garage yet.
+            </p>
+            {% endif %}
+        </section>
+
+        <section class="profile-section">
+            <h2>Posts</h2>
+
+            {% if posts %}
+            <div class="post-grid">
+                {% for post in posts %}
+                <article class="post-card">
+                    {% if post['picture'] %}
+                    <img src="{{ url_for('static', filename=post['picture']) }}" alt="Post by {{ user['username'] }}">
+                    {% endif %}
+
+                    {% if post['content'] %}
+                    <p>{{ post['content'] }}</p>
+                    {% endif %}
+
+                    <small>❤️ {{ post['like_count'] }}</small>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">
+                No posts yet.
+            </p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+
+</html>
