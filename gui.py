@@ -458,7 +458,6 @@ def add_garage_car():
 @app.route("/clans")
 def clans():
     connection = get_db()
-
     user_id = session.get("user_id")
 
     all_clans = connection.execute("""
@@ -467,6 +466,8 @@ def clans():
             c.name,
             c.description,
             c.profile_picture,
+            c.owner_id,
+            u.username AS creator_username,
             COUNT(DISTINCT cm.user_id) AS member_count,
             EXISTS (
                 SELECT 1
@@ -475,14 +476,29 @@ def clans():
                   AND mine.user_id = ?
             ) AS is_member
         FROM clans c
+        JOIN users u ON u.id = c.owner_id
         LEFT JOIN clan_members cm ON cm.clan_id = c.id
         GROUP BY c.id
-        ORDER BY c.name COLLATE NOCASE
+        ORDER BY c.id DESC
     """, (user_id,)).fetchall()
+
+    has_created_clan = False
+
+    if user_id is not None:
+        has_created_clan = connection.execute("""
+            SELECT 1
+            FROM clans
+            WHERE owner_id = ?
+            LIMIT 1
+        """, (user_id,)).fetchone() is not None
 
     connection.close()
 
-    return render_template("clans.html", clans=all_clans)
+    return render_template(
+        "clans.html",
+        clans=all_clans,
+        has_created_clan=has_created_clan
+    )
 
 @app.route("/clans/create", methods=["POST"])
 def create_clan():
@@ -521,8 +537,20 @@ def create_clan():
     finally:
         connection.close()
 
-    flash("Clan created successfully!")
-    return redirect(url_for("clans"))
+    existing_clan = connection.execute("""
+    SELECT id
+    FROM clans
+    WHERE owner_id = ?
+    LIMIT 1
+""", (session["user_id"],)).fetchone()
+
+    if existing_clan:
+        connection.close()
+        flash("You can only create one clan.")
+        return redirect(url_for("clans"))
+
+        flash("Clan created successfully!")
+        return redirect(url_for("clans"))
 
 @app.route("/clans/<int:clan_id>")
 def clan_detail(clan_id):
@@ -788,6 +816,108 @@ def create_event(clan_id):
         )
     finally:
         connection.close()
+
+@app.route("/clans/<int:clan_id>/edit", methods=["GET", "POST"])
+def edit_clan(clan_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    connection = get_db()
+
+    clan = connection.execute(
+        "SELECT * FROM clans WHERE id = ?",
+        (clan_id,)
+    ).fetchone()
+
+    if clan is None:
+        connection.close()
+        abort(404)
+
+    if clan["owner_id"] != session["user_id"]:
+        connection.close()
+        abort(403)
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        description = request.form.get("description", "").strip()
+        profile = request.files.get("profile_picture")
+        cover = request.files.get("cover_picture")
+
+        if not name or not description:
+            flash("Enter a clan name and description.")
+            connection.close()
+            return redirect(url_for("edit_clan", clan_id=clan_id))
+
+        if len(name) > 80 or len(description) > 1000:
+            flash("The name or description is too long.")
+            connection.close()
+            return redirect(url_for("edit_clan", clan_id=clan_id))
+
+        upload_folder = Path(app.root_path) / "static" / "uploads"
+        upload_folder.mkdir(parents=True, exist_ok=True)
+
+        updates = {
+            "name": name,
+            "description": description
+        }
+        saved_files = []
+
+        try:
+            for field, uploaded_file, column in [
+                ("profile_picture", profile, "profile_picture"),
+                ("cover_picture", cover, "cover_picture")
+            ]:
+                if uploaded_file and uploaded_file.filename:
+                    filename = secure_filename(uploaded_file.filename)
+                    if "." not in filename:
+                        raise ValueError("Invalid image filename.")
+
+                    extension = filename.rsplit(".", 1)[1].lower()
+                    if extension not in {"jpg", "jpeg", "png", "webp"}:
+                        raise ValueError("Use JPG, PNG or WebP images.")
+
+                    new_filename = f"{uuid.uuid4().hex}.{extension}"
+                    uploaded_file.save(upload_folder / new_filename)
+                    saved_files.append(upload_folder / new_filename)
+                    updates[column] = f"uploads/{new_filename}"
+
+            connection.execute("""
+                UPDATE clans
+                SET name = ?, description = ?,
+                    profile_picture = COALESCE(?, profile_picture),
+                    cover_picture = COALESCE(?, cover_picture)
+                WHERE id = ?
+            """, (
+                name,
+                description,
+                updates.get("profile_picture"),
+                updates.get("cover_picture"),
+                clan_id
+            ))
+
+            connection.commit()
+
+        except ValueError as error:
+            connection.rollback()
+            for file_path in saved_files:
+                file_path.unlink(missing_ok=True)
+            flash(str(error))
+            connection.close()
+            return redirect(url_for("edit_clan", clan_id=clan_id))
+
+        except Exception:
+            connection.rollback()
+            for file_path in saved_files:
+                file_path.unlink(missing_ok=True)
+            connection.close()
+            raise
+
+        connection.close()
+        flash("Clan profile updated!")
+        return redirect(url_for("clan_detail", clan_id=clan_id))
+
+    connection.close()
+    return render_template("edit_clan.html", clan=clan)
 
 
 if __name__ == "__main__":
