@@ -25,6 +25,22 @@
             <p>{{ clan['description'] }}</p>
             <p>{{ clan['member_count'] }} members</p>
 
+            {% if session.get('user_id') == clan['owner_id'] %}
+            <a class="view-button" href="{{ url_for('edit_clan', clan_id=clan['id']) }}">
+                Edit clan
+            </a>
+            {% endif %}
+
+            {% if clan['cover_picture'] %}
+            <img src="{{ url_for('static', filename=clan['cover_picture']) }}" alt="{{ clan['name'] }} cover"
+                style="width: 100%; max-height: 300px; object-fit: cover; border-radius: 12px;">
+            {% endif %}
+
+            {% if clan['profile_picture'] %}
+            <img src="{{ url_for('static', filename=clan['profile_picture']) }}" alt="{{ clan['name'] }} profile"
+                style="width: 72px; height: 72px; object-fit: cover; border-radius: 50%;">
+            {% endif %}
+
             {% if session.get('user_id') %}
             {% if session['user_id'] == clan['owner_id'] %}
             <a class="view-button" href="{{ url_for('create_event', clan_id=clan['id']) }}">
