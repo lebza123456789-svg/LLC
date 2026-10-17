@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ event['name'] }} | LLC Events</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='events.css') }}">
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <nav>
+            <a href="{{ url_for('home') }}">Feed</a>
+            <a href="{{ url_for('events') }}" class="active">Events</a>
+        </nav>
+    </header>
+
+    <main class="container detail-container">
+        <a class="back-link" href="{{ url_for('events') }}">← All events</a>
+
+        <article class="event-detail">
+            <img src="{{ url_for('static', filename=event['picture']) }}" alt="{{ event['name'] }}"
+                class="detail-image">
+
+            <div class="detail-content">
+                <p class="eyebrow">HOSTED BY {{ event['clan_name']|upper }}</p>
+                <h1>{{ event['name'] }}</h1>
+                <p class="detail-description">{{ event['description'] }}</p>
+
+                <div class="detail-facts">
+                    <div>
+                        <span class="fact-label">DATE</span>
+                        <strong>{{ event['date'] }}</strong>
+                    </div>
+                    <div>
+                        <span class="fact-label">LOCATION</span>
+                        <strong>{{ event['location'] }}</strong>
+                    </div>
+                    <div>
+                        <span class="fact-label">HOSTING CLAN</span>
+                        <strong>{{ event['clan_name'] }}</strong>
+                    </div>
+                </div>
+
+                <a class="button-link" href="{{ url_for('events') }}">Explore more events</a>
+            </div>
+        </article>
+    </main>
+
+    <footer class="site-footer">LLC. LOWLIFECULTURE</footer>
+</body>
+
+</html>
