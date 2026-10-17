@@ -32,15 +32,36 @@
         {% endwith %}
 
         {% if session.get('user_id') %}
-        <section class="create-panel">
-            <h2>Create a clan</h2>
-            <form action="{{ url_for('create_clan') }}" method="POST">
-                <input type="text" name="name" placeholder="Clan name" maxlength="80" required>
-                <textarea name="description" placeholder="What is your clan about?" maxlength="1000"
-                    required></textarea>
-                <button type="submit">+ Create clan</button>
-            </form>
+
+        {% if session.get('user_id') and not has_created_clan %}
+        <section class="create-clan-box">
+            <div>
+                <h2>Start your own clan</h2>
+                <p>Bring your car crew together under one name.</p>
+            </div>
+
+            <details class="create-clan-details">
+                <summary>+ Create clan</summary>
+
+                <form action="{{ url_for('create_clan') }}" method="POST">
+                    <input type="text" name="name" placeholder="Choose a clan name" maxlength="80" required>
+
+                    <textarea name="description" placeholder="What is your clan about?" maxlength="1000"
+                        required></textarea>
+
+                    <button type="submit">Create my clan</button>
+                </form>
+            </details>
         </section>
+        {% elif session.get('user_id') and has_created_clan %}
+        <section class="create-clan-box">
+            <div>
+                <h2>You're a clan founder</h2>
+                <p>You have already created your clan. Find other clubs below and join their communities.</p>
+            </div>
+        </section>
+        {% endif %}
+
         {% endif %}
 
         <section class="clan-section">
@@ -64,6 +85,9 @@
                     <div class="clan-content">
                         <h3>{{ clan['name'] }}</h3>
                         <p>{{ clan['description'] }}</p>
+                        <p class="clan-creator">
+                            Created by @{{ clan['creator_username'] }}
+                        </p>
 
                         <div class="clan-meta">
                             <span>
