@@ -140,6 +140,25 @@ CREATE TABLE IF NOT EXISTS post_likes (
     UNIQUE (post_id, user_id)
 ); """)
 
+def add_column_if_missing(connection, table, column, definition):
+    columns = connection.execute(
+        f"PRAGMA table_info({table})"
+    ).fetchall()
+
+    if column not in [row[1] for row in columns]:
+        connection.execute(
+            f"ALTER TABLE {table} ADD COLUMN {column} {definition}"
+        )
+
+add_column_if_missing(
+    connection,
+    "clans",
+    "cover_picture",
+    "TEXT"
+)
+
+
+
 connection.commit()
 connection.close()
 
