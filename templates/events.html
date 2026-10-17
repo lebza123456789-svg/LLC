@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Events | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='events.css') }}">
+</head>
+
+<body>
+    <header class="site-header">
+        <a class="brand" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <nav>
+            <a href="{{ url_for('home') }}">Feed</a>
+            <a href="{{ url_for('events') }}" class="active">Events</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">LOWLIFECULTURE / COMMUNITY</p>
+            <h1>Car culture.<br><span>In real life.</span></h1>
+            <p>Find meets, connect with crews and bring your build out.</p>
+        </section>
+
+        <section class="events-section">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">WHAT'S COMING UP</p>
+                    <h2>Upcoming events</h2>
+                </div>
+                <span class="event-total">{{ events|length }} events</span>
+            </div>
+
+            {% if events %}
+            <div class="events-grid">
+                {% for event in events %}
+                <article class="event-card">
+                    <a class="event-image-link" href="{{ url_for('event_detail', event_id=event['id']) }}">
+                        <img src="{{ url_for('static', filename=event['picture']) }}" alt="{{ event['name'] }}"
+                            class="event-image">
+                        <span class="image-tag">LLC EVENT</span>
+                    </a>
+
+                    <div class="event-content">
+                        <p class="event-clan">{{ event['clan_name'] }}</p>
+                        <h3>
+                            <a href="{{ url_for('event_detail', event_id=event['id']) }}">
+                                {{ event['name'] }}
+                            </a>
+                        </h3>
+
+                        <p class="event-description">
+                            {{ event['description']|truncate(130) }}
+                        </p>
+
+                        <div class="event-meta">
+                            <span>◷ {{ event['date'] }}</span>
+                            <span>⌖ {{ event['location'] }}</span>
+                        </div>
+
+                        <a class="event-link" href="{{ url_for('event_detail', event_id=event['id']) }}">
+                            View event <span>→</span>
+                        </a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-symbol">＋</div>
+                <h3>No upcoming events yet.</h3>
+                <p>The next big meet could start with your clan.</p>
+                {% if session.get('user_id') %}
+                <a class="button-link" href="{{ url_for('home') }}#clans">
+                    Find your clan
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="site-footer">LLC. LOWLIFECULTURE</footer>
+</body>
+
+</html>
