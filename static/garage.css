@@ -1,0 +1,248 @@
+:root {
+    --black: #101010;
+    --orange: #FF5A1F;
+    --bone: #E8E4DC;
+    --charcoal: #1B1B1B;
+    --muted: #99958F;
+    --border: #303030;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--black);
+    color: var(--bone);
+    font-family: Arial, sans-serif;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.garage-header {
+    min-height: 70px;
+    padding: 0 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--black);
+}
+
+.brand {
+    font-size: 27px;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+.brand span,
+.garage-intro h1 span {
+    color: var(--orange);
+}
+
+.garage-header nav {
+    display: flex;
+    gap: 25px;
+    font-size: 14px;
+}
+
+.garage-header nav a {
+    color: var(--muted);
+}
+
+.garage-header nav a.active,
+.garage-header nav a:hover {
+    color: var(--orange);
+}
+
+.garage-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 45px 24px 70px;
+}
+
+.garage-intro {
+    margin-bottom: 35px;
+}
+
+.eyebrow,
+.car-label {
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.garage-intro h1 {
+    margin: 12px 0;
+    font-size: clamp(38px, 6vw, 60px);
+    letter-spacing: -2px;
+}
+
+.garage-intro>p:last-child {
+    color: var(--muted);
+}
+
+.add-car-section {
+    padding: 25px;
+    background: var(--charcoal);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 45px;
+}
+
+.add-car-section h2,
+.cars-section h2 {
+    margin-top: 0;
+}
+
+.add-car-section form {
+    display: grid;
+    gap: 12px;
+}
+
+.add-car-section label {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.add-car-section textarea,
+.add-car-section input[type="file"] {
+    width: 100%;
+    padding: 13px;
+    background: #111;
+    color: var(--bone);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font: inherit;
+}
+
+.add-car-section textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.add-car-section button {
+    padding: 14px;
+    background: var(--orange);
+    color: #111;
+    border: none;
+    border-radius: 7px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.add-car-section button:hover {
+    background: #ff7847;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-heading span,
+.car-date {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.cars-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.car-card {
+    overflow: hidden;
+    background: var(--charcoal);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.car-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: #222;
+}
+
+.car-details {
+    padding: 16px;
+}
+
+.car-label {
+    font-size: 10px;
+}
+
+.car-description {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.empty-garage {
+    padding: 45px 20px;
+    text-align: center;
+    border: 1px dashed #444;
+    border-radius: 12px;
+}
+
+.empty-icon {
+    color: var(--orange);
+    font-size: 35px;
+}
+
+.empty-garage p {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.flash-message {
+    margin-bottom: 20px;
+    padding: 12px 15px;
+    border: 1px solid var(--orange);
+    border-radius: 7px;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 750px) {
+    .garage-header {
+        padding: 0 18px;
+    }
+
+    .garage-header nav {
+        gap: 15px;
+        font-size: 12px;
+    }
+
+    .garage-container {
+        padding: 30px 16px 45px;
+    }
+
+    .add-car-section {
+        padding: 18px;
+    }
+
+    .cars-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .car-details {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 420px) {
+    .cars-grid {
+        grid-template-columns: 1fr;
+    }
+}
