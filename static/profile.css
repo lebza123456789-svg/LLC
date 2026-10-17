@@ -1,0 +1,181 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #101010;
+    color: #E8E4DC;
+    font-family: Arial, sans-serif;
+}
+
+.profile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 7%;
+    border-bottom: 1px solid #303030;
+}
+
+.logo {
+    color: #E8E4DC;
+    font-size: 26px;
+    font-weight: 900;
+    text-decoration: none;
+}
+
+.logo span {
+    color: #FF5A1F;
+}
+
+.back-link {
+    color: #FF5A1F;
+    text-decoration: none;
+}
+
+.profile-container {
+    width: min(1000px, 92%);
+    margin: 40px auto;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #FF5A1F;
+}
+
+.avatar-placeholder {
+    display: grid;
+    place-items: center;
+    background: #242424;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.profile-info h1 {
+    margin: 0 0 8px;
+    overflow-wrap: anywhere;
+}
+
+.muted,
+.empty-state {
+    color: #999;
+}
+
+.edit-button {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 9px 14px;
+    background: #FF5A1F;
+    color: #101010;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 30px 0 40px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 20px 10px;
+    background: #1A1A1A;
+    border: 1px solid #303030;
+    border-radius: 10px;
+}
+
+.stat strong {
+    font-size: 24px;
+}
+
+.stat span {
+    color: #999;
+    font-size: 13px;
+}
+
+.profile-section {
+    margin-top: 35px;
+}
+
+.profile-section h2 {
+    margin-bottom: 18px;
+}
+
+.car-grid,
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.car-card,
+.post-card {
+    min-width: 0;
+    overflow: hidden;
+    background: #1A1A1A;
+    border: 1px solid #303030;
+    border-radius: 10px;
+}
+
+.car-card img,
+.post-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+}
+
+.car-card p,
+.post-card p,
+.post-card small {
+    display: block;
+    margin: 12px;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.post-card small {
+    color: #FF5A1F;
+}
+
+.empty-state {
+    padding: 22px;
+    background: #1A1A1A;
+    border-radius: 10px;
+}
+
+@media (max-width: 650px) {
+    .profile-container {
+        margin-top: 25px;
+    }
+
+    .profile-header {
+        gap: 15px;
+    }
+
+    .avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .car-grid,
+    .post-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+}
