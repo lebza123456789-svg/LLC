@@ -455,6 +455,119 @@ def add_garage_car():
     flash("Your car was added to your garage!")
     return redirect(url_for("garage"))
 
+@app.route("/clans")
+def clans():
+    connection = get_db()
+
+    user_id = session.get("user_id")
+
+    all_clans = connection.execute("""
+        SELECT
+            c.id,
+            c.name,
+            c.description,
+            c.profile_picture,
+            COUNT(DISTINCT cm.user_id) AS member_count,
+            EXISTS (
+                SELECT 1
+                FROM clan_members mine
+                WHERE mine.clan_id = c.id
+                  AND mine.user_id = ?
+            ) AS is_member
+        FROM clans c
+        LEFT JOIN clan_members cm ON cm.clan_id = c.id
+        GROUP BY c.id
+        ORDER BY c.name COLLATE NOCASE
+    """, (user_id,)).fetchall()
+
+    connection.close()
+
+    return render_template("clans.html", clans=all_clans)
+
+@app.route("/clans/create", methods=["POST"])
+def create_clan():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    name = request.form.get("name", "").strip()
+    description = request.form.get("description", "").strip()
+
+    if not name or not description:
+        flash("Enter a clan name and description.")
+        return redirect(url_for("clans"))
+
+    connection = get_db()
+
+    try:
+        cursor = connection.execute("""
+            INSERT INTO clans (name, description, owner_id)
+            VALUES (?, ?, ?)
+        """, (name, description, session["user_id"]))
+
+        clan_id = cursor.lastrowid
+
+        connection.execute("""
+            INSERT INTO clan_members (clan_id, user_id)
+            VALUES (?, ?)
+        """, (clan_id, session["user_id"]))
+
+        connection.commit()
+
+    except sqlite3.IntegrityError:
+        connection.rollback()
+        flash("That clan name already exists.")
+        return redirect(url_for("clans"))
+
+    finally:
+        connection.close()
+
+    flash("Clan created successfully!")
+    return redirect(url_for("clans"))
+
+@app.route("/clans/<int:clan_id>")
+def clan_detail(clan_id):
+    connection = get_db()
+
+    clan = connection.execute("""
+        SELECT
+            c.*,
+            COUNT(DISTINCT cm.user_id) AS member_count
+        FROM clans c
+        LEFT JOIN clan_members cm ON cm.clan_id = c.id
+        WHERE c.id = ?
+        GROUP BY c.id
+    """, (clan_id,)).fetchone()
+
+    if clan is None:
+        connection.close()
+        abort(404)
+
+    members = connection.execute("""
+        SELECT u.id, u.username, u.profile_picture
+        FROM clan_members cm
+        JOIN users u ON u.id = cm.user_id
+        WHERE cm.clan_id = ?
+        ORDER BY u.username
+    """, (clan_id,)).fetchall()
+
+    events = connection.execute("""
+        SELECT id, name, date, location, picture
+        FROM events
+        WHERE clan_id = ?
+        ORDER BY date(date) ASC
+    """, (clan_id,)).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "clan_detail.html",
+        clan=clan,
+        members=members,
+        events=events
+    )
+
+
+
 # FUNCTION FOR THE EVENT PSOTING 
 
 ALLOWED_EVENT_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
