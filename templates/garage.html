@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Garage | LLC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='garage.css') }}">
+</head>
+
+<body>
+
+    <header class="garage-header">
+        <a href="{{ url_for('home') }}" class="brand">
+            LLC<span>.</span>
+        </a>
+
+        <nav>
+            <a href="{{ url_for('home') }}">Feed</a>
+            <a href="{{ url_for('garage') }}" class="active">My Garage</a>
+        </nav>
+    </header>
+
+    <main class="garage-container">
+
+        <section class="garage-intro">
+            <p class="eyebrow">LOWLIFECULTURE / YOUR COLLECTION</p>
+            <h1>My Garage<span>.</span></h1>
+            <p>Every build has a story. Show yours.</p>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <section class="add-car-section">
+            <h2>Add a car</h2>
+
+            <form action="{{ url_for('add_garage_car') }}" method="POST" enctype="multipart/form-data">
+
+                <label for="description">Tell us about your build</label>
+                <textarea id="description" name="description" placeholder="Your setup, modifications, plans..."
+                    maxlength="1000" required></textarea>
+
+                <label for="picture">Car photo</label>
+                <input type="file" id="picture" name="picture" accept=".jpg,.jpeg,.png,.webp" required>
+
+                <button type="submit">+ Add to garage</button>
+            </form>
+        </section>
+
+        <section class="cars-section">
+            <div class="section-heading">
+                <h2>Your collection</h2>
+                <span>{{ cars|length }} car(s)</span>
+            </div>
+
+            {% if cars %}
+            <div class="cars-grid">
+                {% for car in cars %}
+                <article class="car-card">
+                    <img src="{{ url_for('static', filename=car['picture']) }}" alt="Car in garage" class="car-image">
+
+                    <div class="car-details">
+                        <p class="car-label">LLC GARAGE</p>
+                        <p class="car-description">
+                            {{ car['description'] }}
+                        </p>
+                        <p class="car-date">
+                            Added {{ car['created_at'] }}
+                        </p>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-garage">
+                <span class="empty-icon">＋</span>
+                <h3>Your garage starts here.</h3>
+                <p>Add your first car and let the community see your build.</p>
+            </div>
+            {% endif %}
+        </section>
+
+    </main>
+
+</body>
+
+</html>
