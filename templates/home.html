@@ -31,7 +31,7 @@
                     <span>Explore</span>
                 </a>
 
-                <a href="#garage" class="nav-link">
+                <a href="{{ url_for('garage') }}" class="nav-link">
                     <span class="nav-icon">▣</span>
                     <span>My Garage</span>
                 </a>
@@ -41,7 +41,7 @@
                     <span>Clans</span>
                 </a>
 
-                <a href="#events" class="nav-link">
+                <a href="{{ url_for('events') }}" class="nav-link">
                     <span class="nav-icon">▦</span>
                     <span>Events</span>
                 </a>
@@ -317,7 +317,7 @@
                             <span class="discovery-arrow">›</span>
                         </a>
 
-                        <a href="#events" class="discovery-item">
+                        <a href="{{ url_for('events') }}" class="discovery-item">
                             <span class="discovery-icon">▦</span>
                             <span>
                                 <strong>Car meets</strong>
