@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clans | LowLifeCulture</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='clans.css') }}">
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="logo" href="{{ url_for('home') }}">LLC<span>.</span></a>
+        <nav>
+            <a href="{{ url_for('home') }}">Feed</a>
+            <a href="{{ url_for('events') }}">Events</a>
+            <a class="active" href="{{ url_for('clans') }}">Clans</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <p class="eyebrow">LOWLIFECULTURE COMMUNITY</p>
+            <h1>Find your <span>clan.</span></h1>
+            <p>Build together. Represent your scene. Make your mark.</p>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+        <div class="notice">{{ message }}</div>
+        {% endfor %}
+        {% endwith %}
+
+        {% if session.get('user_id') %}
+        <section class="create-panel">
+            <h2>Create a clan</h2>
+            <form action="{{ url_for('create_clan') }}" method="POST">
+                <input type="text" name="name" placeholder="Clan name" maxlength="80" required>
+                <textarea name="description" placeholder="What is your clan about?" maxlength="1000"
+                    required></textarea>
+                <button type="submit">+ Create clan</button>
+            </form>
+        </section>
+        {% endif %}
+
+        <section class="clan-section">
+            <div class="section-heading">
+                <h2>Discover clans</h2>
+                <span>{{ clans|length }} clubs</span>
+            </div>
+
+            {% if clans %}
+            <div class="clan-grid">
+                {% for clan in clans %}
+                <article class="clan-card">
+                    <div class="clan-banner">
+                        {% if clan['profile_picture'] %}
+                        <img src="{{ url_for('static', filename=clan['profile_picture']) }}" alt="{{ clan['name'] }}">
+                        {% else %}
+                        <span>LLC.</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="clan-content">
+                        <h3>{{ clan['name'] }}</h3>
+                        <p>{{ clan['description'] }}</p>
+
+                        <div class="clan-meta">
+                            <span>
+                                {{ clan['member_count'] }}
+                                {% if clan['member_count'] == 1 %}
+                                member
+                                {% else %}
+                                members
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <a class="view-button" href="{{ url_for('clan_detail', clan_id=clan['id']) }}">
+                            View clan →
+                        </a>
+
+                        {% if session.get('user_id') %}
+                        {% if clan['is_member'] %}
+                        <span class="member-label">✓ Member</span>
+                        {% else %}
+                        <form action="{{ url_for('join_clan', clan_id=clan['id']) }}" method="POST">
+                            <button class="join-button" type="submit">
+                                Join clan
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <h3>No clans yet.</h3>
+                <p>Start the first club and bring your car community together.</p>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+
+</html>
