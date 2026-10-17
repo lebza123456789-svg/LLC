@@ -244,3 +244,74 @@ button,
         padding-top: 35px;
     }
 }
+
+.create-clan-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    margin-bottom: 35px;
+    background: #191919;
+    border: 1px solid #303030;
+    border-radius: 12px;
+}
+
+.create-clan-box h2 {
+    margin: 0 0 8px;
+}
+
+.create-clan-box p,
+.clan-creator {
+    color: #999999;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.create-clan-details {
+    min-width: 155px;
+}
+
+.create-clan-details summary {
+    padding: 12px 16px;
+    background: #FF5A1F;
+    color: #101010;
+    border-radius: 7px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    list-style: none;
+}
+
+.create-clan-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.create-clan-details[open] {
+    width: min(100%, 360px);
+}
+
+.create-clan-details[open] summary {
+    margin-bottom: 12px;
+}
+
+.create-clan-details form {
+    display: grid;
+    gap: 12px;
+}
+
+.clan-creator {
+    margin: 0;
+}
+
+@media (max-width: 520px) {
+    .create-clan-box {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .create-clan-details,
+    .create-clan-details[open] {
+        width: 100%;
+    }
+}
